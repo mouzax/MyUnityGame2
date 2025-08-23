@@ -1,30 +1,45 @@
 using UnityEngine;
 
+[RequireComponent(typeof(SpriteRenderer))]
 public class PlayerController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    float moveSpeed = 5;
-    void Start()
+    [SerializeField] float moveSpeed = 5f;
+    [SerializeField] float padding = 0.1f;
+
+    Camera cam;
+    float halfW, halfH;
+
+    void Awake()
     {
-        
+        cam = Camera.main;
+
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            halfW = sr.bounds.extents.x;
+            halfH = sr.bounds.extents.y;
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        float horizontalInput = Input.GetAxis("Horizontal"); // A/D keys or Left/Right Arrow keys
-        float verticalInput = Input.GetAxis("Vertical");   // W/S keys or Up/Down Arrow keys
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
 
-        // Calculate movement direction
-        Vector3 movement = new Vector3(horizontalInput, verticalInput, 0f);
+        Vector3 dir = new Vector3(h, v, 0f).normalized;
+        Vector3 pos = transform.position + dir * moveSpeed * Time.deltaTime;
 
-        // Normalize the movement vector to prevent faster diagonal movement
-        if (movement.magnitude > 1f)
-        {
-            movement.Normalize();
-        }
+        float camHeight = cam.orthographicSize * 2f;
+        float camWidth  = camHeight * cam.aspect;
 
-        // Apply movement to the player's position
-        transform.Translate(movement * moveSpeed * Time.deltaTime);
+        float minX = cam.transform.position.x - camWidth  / 2f + halfW + padding;
+        float maxX = cam.transform.position.x + camWidth  / 2f - halfW - padding;
+        float minY = cam.transform.position.y - camHeight / 2f + halfH + padding;
+        float maxY = cam.transform.position.y + camHeight / 2f - halfH - padding;
+
+        pos.x = Mathf.Clamp(pos.x, minX, maxX);
+        pos.y = Mathf.Clamp(pos.y, minY, maxY);
+
+        transform.position = pos;
     }
 }
