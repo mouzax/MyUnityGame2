@@ -3,8 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class CameraClamp2D : MonoBehaviour
 {
-    public Transform target;              // Player
-    public SpriteRenderer roomSprite;     // The room image (SpriteRenderer)
+    public Transform target;
+    public SpriteRenderer roomSprite;
 
     Camera cam;
     Vector2 roomMin, roomMax;
@@ -13,25 +13,18 @@ public class CameraClamp2D : MonoBehaviour
     {
         cam = GetComponent<Camera>();
 
-        // Get room bounds from the sprite (world space)
         Bounds b = roomSprite.bounds;
         roomMin = b.min;
         roomMax = b.max;
 
-        // --- FIT CAMERA SIZE INSIDE ROOM ---
         float roomWidth  = b.size.x;
         float roomHeight = b.size.y;
         float aspect = cam.aspect;
 
-        // For an orthographic camera:
-        // visibleWidth  = 2 * size * aspect
-        // visibleHeight = 2 * size
-        // We need both <= room size.
         float sizeByHeight = roomHeight * 0.5f;
         float sizeByWidth  = (roomWidth  * 0.5f) / aspect;
 
         cam.orthographicSize = Mathf.Min(sizeByHeight, sizeByWidth);
-        // -----------------------------------
     }
 
     void LateUpdate()

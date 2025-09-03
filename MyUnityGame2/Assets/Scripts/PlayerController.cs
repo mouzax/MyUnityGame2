@@ -9,15 +9,26 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float moveSpeed = 5f;
 
     [Header("Confinement (draw over the brown floor)")]
-    [SerializeField] PolygonCollider2D walkArea;   // Must be assigned in Inspector, Is Trigger = ON
-    [SerializeField] float skin = 0.015f;          // tiny inward padding to avoid snagging
+    [SerializeField] PolygonCollider2D walkArea;
+    [SerializeField] float skin = 0.015f;
+
+    [Header("Grab / Toggle (SPACE)")]
+    [SerializeField] Transform handAnchor;
+    [SerializeField] float grabRadius = 0.7f;
+    [SerializeField] LayerMask grabbableMask = ~0;
+    [SerializeField] bool disableHeldCollider = true;
+    [SerializeField] float dropNudge = 0.5f;
 
     Rigidbody2D rb;
     BoxCollider2D box;
     SpriteRenderer sr;
 
     Vector2 input;
-    int lastLookDir = 1; // 1=right, -1=left
+    int lastLookDir = 1;
+
+    Rigidbody2D heldRb;
+    Collider2D  heldCol;
+    Transform   heldTf;
 
     void Awake()
     {
@@ -25,38 +36,50 @@ public class PlayerController : MonoBehaviour
         box = GetComponent<BoxCollider2D>();
         sr  = GetComponent<SpriteRenderer>();
 
-        // Top-down RB settings
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
 
-        // Optional: zero-friction mat so edges feel smooth
         var mat = new PhysicsMaterial2D("NoFriction") { friction = 0f, bounciness = 0f };
         box.sharedMaterial = mat;
+
+        if (handAnchor == null)
+        {
+            var go = new GameObject("Hand");
+            go.transform.SetParent(transform);
+            go.transform.localPosition = new Vector3(0.25f, 0f, 0f);
+            handAnchor = go.transform;
+        }
     }
 
-    void FixedUpdate()
+    void Update()
     {
-        // --- Input ---
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
         input = new Vector2(h, v);
         if (input.sqrMagnitude > 1f) input.Normalize();
 
-        // --- Flip sprite & remember facing when idle ---
         if (h > 0.01f) lastLookDir = 1;
         else if (h < -0.01f) lastLookDir = -1;
         sr.flipX = (lastLookDir == -1);
 
-        // --- Movement with polygon confinement & smooth slide ---
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (heldTf == null) TryPickup();
+            else Drop();
+        }
+
+        if (heldTf != null) heldTf.position = handAnchor.position;
+    }
+
+    void FixedUpdate()
+    {
         Vector2 pos   = rb.position;
         Vector2 delta = input * moveSpeed * Time.fixedDeltaTime;
 
-        // 1) Try full move
         if (CanFitInside(pos + delta)) { rb.MovePosition(pos + delta); return; }
 
-        // 2) Slide along nearest polygon edge (true tangent slide)
         Vector2 edgeA, edgeB;
         if (TryGetNearestEdge(walkArea, pos + delta, out edgeA, out edgeB))
         {
@@ -65,10 +88,64 @@ public class PlayerController : MonoBehaviour
             if (TrySlide(pos, slide)) return;
         }
 
-        // 3) Fallback: axis slides (X then Y) for tight corners
         if (TrySlide(pos, new Vector2(delta.x, 0f))) return;
         if (TrySlide(pos, new Vector2(0f, delta.y))) return;
-        // 4) Blocked: stay put
+    }
+
+    void TryPickup()
+    {
+        Collider2D[] hits = new Collider2D[8];
+        int count = Physics2D.OverlapCircleNonAlloc(transform.position, grabRadius, hits, grabbableMask);
+
+        float bestDist = float.PositiveInfinity;
+        Collider2D best = null;
+
+        for (int i = 0; i < count; i++)
+        {
+            var col = hits[i];
+            if (col == null || col.attachedRigidbody == rb) continue;
+            if (!col.gameObject.activeInHierarchy) continue;
+
+            var grab = col.GetComponent<Grabbable>();
+            if (grab == null) continue;
+
+            float d = Vector2.SqrMagnitude((Vector2)col.transform.position - (Vector2)handAnchor.position);
+            if (d < bestDist) { bestDist = d; best = col; }
+        }
+
+        if (best == null) return;
+
+        heldCol = best;
+        heldRb  = best.attachedRigidbody;
+        heldTf  = best.transform;
+
+        heldTf.SetParent(handAnchor);
+        heldTf.position = handAnchor.position;
+
+        if (heldRb != null)
+        {
+            heldRb.linearVelocity = Vector2.zero;
+            heldRb.angularVelocity = 0f;
+            heldRb.isKinematic = true;
+        }
+        if (disableHeldCollider && heldCol != null) heldCol.enabled = false;
+    }
+
+    void Drop()
+    {
+        if (heldTf == null) return;
+
+        heldTf.SetParent(null);
+
+        if (heldRb != null)
+        {
+            heldRb.isKinematic = false;
+            Vector2 push = (input.sqrMagnitude > 0.01f ? input : new Vector2(lastLookDir, 0f)) * dropNudge;
+            heldRb.linearVelocity = push / Mathf.Max(Time.fixedDeltaTime, 0.0001f);
+        }
+        if (heldCol != null && disableHeldCollider) heldCol.enabled = true;
+
+        heldTf = null; heldRb = null; heldCol = null;
     }
 
     bool TrySlide(Vector2 from, Vector2 slide)
@@ -78,7 +155,6 @@ public class PlayerController : MonoBehaviour
         Vector2 target = from + slide;
         if (CanFitInside(target)) { rb.MovePosition(target); return true; }
 
-        // Nudge down the distance a few times to hug corners
         float t = 0.8f;
         for (int i = 0; i < 3; i++)
         {
@@ -89,18 +165,16 @@ public class PlayerController : MonoBehaviour
         return false;
     }
 
-    // Ensure the whole BoxCollider2D fits inside the polygon at 'center'
     bool CanFitInside(Vector2 center)
     {
-        // assumes Z rotation frozen (box not rotated)
         Vector2 half = Vector2.Scale(box.size * 0.5f, transform.lossyScale);
         Vector2 off  = box.offset;
         Vector2 c    = center + off;
 
-        Vector2 p1 = new Vector2(c.x - half.x + skin, c.y - half.y + skin); // BL
-        Vector2 p2 = new Vector2(c.x + half.x - skin, c.y - half.y + skin); // BR
-        Vector2 p3 = new Vector2(c.x - half.x + skin, c.y + half.y - skin); // TL
-        Vector2 p4 = new Vector2(c.x + half.x - skin, c.y + half.y - skin); // TR
+        Vector2 p1 = new Vector2(c.x - half.x + skin, c.y - half.y + skin);
+        Vector2 p2 = new Vector2(c.x + half.x - skin, c.y - half.y + skin);
+        Vector2 p3 = new Vector2(c.x - half.x + skin, c.y + half.y - skin);
+        Vector2 p4 = new Vector2(c.x + half.x - skin, c.y + half.y - skin);
 
         return walkArea.OverlapPoint(p1) &&
                walkArea.OverlapPoint(p2) &&
@@ -108,7 +182,6 @@ public class PlayerController : MonoBehaviour
                walkArea.OverlapPoint(p4);
     }
 
-    // Find nearest polygon edge (world space) to a point
     bool TryGetNearestEdge(PolygonCollider2D poly, Vector2 point, out Vector2 bestA, out Vector2 bestB)
     {
         bestA = bestB = default;
@@ -117,7 +190,7 @@ public class PlayerController : MonoBehaviour
         int pathCount = poly.pathCount;
         for (int p = 0; p < pathCount; p++)
         {
-            var path = poly.GetPath(p);  // local space points
+            var path = poly.GetPath(p);
             int n = path.Length;
             if (n < 2) continue;
 
@@ -126,16 +199,12 @@ public class PlayerController : MonoBehaviour
                 Vector2 a = poly.transform.TransformPoint(path[i]);
                 Vector2 b = poly.transform.TransformPoint(path[(i + 1) % n]);
                 float d = DistancePointToSegment(point, a, b, out _);
-                if (d < bestDist)
-                {
-                    bestDist = d; bestA = a; bestB = b;
-                }
+                if (d < bestDist) { bestDist = d; bestA = a; bestB = b; }
             }
         }
         return bestDist < float.PositiveInfinity;
     }
 
-    // Distance from point to segment (also returns closest point)
     float DistancePointToSegment(Vector2 p, Vector2 a, Vector2 b, out Vector2 closest)
     {
         Vector2 ab = b - a;
@@ -143,5 +212,14 @@ public class PlayerController : MonoBehaviour
         t = Mathf.Clamp01(t);
         closest = a + t * ab;
         return Vector2.Distance(p, closest);
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (handAnchor != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(handAnchor.position, grabRadius);
+        }
     }
 }
