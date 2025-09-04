@@ -78,14 +78,21 @@ public class PlayerController : MonoBehaviour
         Vector2 pos   = rb.position;
         Vector2 delta = input * moveSpeed * Time.fixedDeltaTime;
 
-        if (CanFitInside(pos + delta)) { rb.MovePosition(pos + delta); return; }
-
-        Vector2 edgeA, edgeB;
-        if (TryGetNearestEdge(walkArea, pos + delta, out edgeA, out edgeB))
+        if (walkArea != null && CanFitInside(pos + delta))
         {
-            Vector2 edgeDir = (edgeB - edgeA).normalized;
-            Vector2 slide   = Vector2.Dot(delta, edgeDir) * edgeDir;
-            if (TrySlide(pos, slide)) return;
+            rb.MovePosition(pos + delta);
+            return;
+        }
+
+        if (walkArea != null)
+        {
+            Vector2 edgeA, edgeB;
+            if (TryGetNearestEdge(walkArea, pos + delta, out edgeA, out edgeB))
+            {
+                Vector2 edgeDir = (edgeB - edgeA).normalized;
+                Vector2 slide   = Vector2.Dot(delta, edgeDir) * edgeDir;
+                if (TrySlide(pos, slide)) return;
+            }
         }
 
         if (TrySlide(pos, new Vector2(delta.x, 0f))) return;
@@ -94,22 +101,19 @@ public class PlayerController : MonoBehaviour
 
     void TryPickup()
     {
-        Collider2D[] hits = new Collider2D[8];
-        int count = Physics2D.OverlapCircleNonAlloc(transform.position, grabRadius, hits, grabbableMask);
+        var hits = Physics2D.OverlapCircleAll(transform.position, grabRadius, grabbableMask);
 
         float bestDist = float.PositiveInfinity;
         Collider2D best = null;
 
-        for (int i = 0; i < count; i++)
+        foreach (var col in hits)
         {
-            var col = hits[i];
             if (col == null || col.attachedRigidbody == rb) continue;
             if (!col.gameObject.activeInHierarchy) continue;
 
-            var grab = col.GetComponent<Grabbable>();
-            if (grab == null) continue;
+            if (col.GetComponent<Grabbable>() == null) continue;
 
-            float d = Vector2.SqrMagnitude((Vector2)col.transform.position - (Vector2)handAnchor.position);
+            float d = ((Vector2)col.transform.position - (Vector2)handAnchor.position).sqrMagnitude;
             if (d < bestDist) { bestDist = d; best = col; }
         }
 
@@ -126,7 +130,7 @@ public class PlayerController : MonoBehaviour
         {
             heldRb.linearVelocity = Vector2.zero;
             heldRb.angularVelocity = 0f;
-            heldRb.isKinematic = true;
+            heldRb.bodyType = RigidbodyType2D.Kinematic;
         }
         if (disableHeldCollider && heldCol != null) heldCol.enabled = false;
     }
@@ -139,7 +143,7 @@ public class PlayerController : MonoBehaviour
 
         if (heldRb != null)
         {
-            heldRb.isKinematic = false;
+            heldRb.bodyType = RigidbodyType2D.Dynamic;
             Vector2 push = (input.sqrMagnitude > 0.01f ? input : new Vector2(lastLookDir, 0f)) * dropNudge;
             heldRb.linearVelocity = push / Mathf.Max(Time.fixedDeltaTime, 0.0001f);
         }
@@ -153,7 +157,7 @@ public class PlayerController : MonoBehaviour
         if (slide == Vector2.zero) return false;
 
         Vector2 target = from + slide;
-        if (CanFitInside(target)) { rb.MovePosition(target); return true; }
+        if (walkArea == null || CanFitInside(target)) { rb.MovePosition(target); return true; }
 
         float t = 0.8f;
         for (int i = 0; i < 3; i++)
