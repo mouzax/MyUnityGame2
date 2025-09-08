@@ -103,12 +103,12 @@ TextureImporter:
       name: image-removebg-preview (3)_0
       rect:
         serializedVersion: 2
-        x: 25
-        y: 5
-        width: 630
-        height: 339
+        x: 26
+        y: 6
+        width: 628
+        height: 337
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 036755d37b9003a4e811c6fd8ba5a83c
     internalID: 0
     vertices: []
     indices: 
