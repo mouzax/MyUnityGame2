@@ -579,7 +579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e3ed5b6d7894f144a5efd1ecf94b5bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 2
   walkArea: {fileID: 1708587886}
   skin: 0.015
   handAnchor: {fileID: 168551231}
