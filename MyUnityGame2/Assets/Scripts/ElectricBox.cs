@@ -3,7 +3,7 @@ using UnityEngine;
 public class ElectricBox : MonoBehaviour
 {
     [SerializeField] LightingController lighting; 
-    [SerializeField] KeyCode interactKey = KeyCode.Space; // <-- changed from E to Space
+    [SerializeField] KeyCode interactKey = KeyCode.Space;
 
     bool playerInRange;
 
@@ -31,7 +31,6 @@ public class ElectricBox : MonoBehaviour
         if (Input.GetKeyDown(interactKey) && lighting)
         {
             lighting.TurnPowerOn();
-            // optional: play SFX, show “Power Restored” message, etc.
         }
     }
 }

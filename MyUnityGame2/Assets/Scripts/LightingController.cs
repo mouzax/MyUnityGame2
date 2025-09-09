@@ -4,8 +4,8 @@ using UnityEngine.Rendering.Universal;
 
 public class LightingController : MonoBehaviour
 {
-    [SerializeField] Light2D globalLight;    // assign GlobalLight
-    [SerializeField] Light2D playerFlashlight; // assign Player/Flashlight
+    [SerializeField] Light2D globalLight;
+    [SerializeField] Light2D playerFlashlight;
     [SerializeField] float fadeSeconds = 1.0f;
 
     bool powerOn = false;
@@ -13,14 +13,13 @@ public class LightingController : MonoBehaviour
 
     void Start()
     {
-        // start fully dark, flashlight on
         if (globalLight) globalLight.intensity = 0f;
         if (playerFlashlight) playerFlashlight.gameObject.SetActive(true);
     }
 
     public void TurnPowerOn()
     {
-        if (powerOn) return; // one-time
+        if (powerOn) return;
         powerOn = true;
         if (fadeCo != null) StopCoroutine(fadeCo);
         fadeCo = StartCoroutine(FadeGlobal(1f));
