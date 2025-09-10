@@ -7,6 +7,7 @@ public class LightingController : MonoBehaviour
     [SerializeField] Light2D globalLight;
     [SerializeField] Light2D playerFlashlight;
     [SerializeField] float fadeSeconds = 1.0f;
+    [SerializeField] Mission1State mission1;
 
     bool powerOn = false;
     Coroutine fadeCo;
@@ -24,6 +25,7 @@ public class LightingController : MonoBehaviour
         if (fadeCo != null) StopCoroutine(fadeCo);
         fadeCo = StartCoroutine(FadeGlobal(1f));
         if (playerFlashlight) playerFlashlight.gameObject.SetActive(false);
+        if (mission1) mission1.SetPowerOn();
     }
 
     IEnumerator FadeGlobal(float target)

@@ -3,21 +3,17 @@ using UnityEngine;
 public class LockedDoor : MonoBehaviour
 {
     [SerializeField] KeyCode interactKey = KeyCode.Space;
-    [SerializeField] string lockedMessage = "Locked! Requires passcode.";
     [SerializeField] UIMessage messageUI;
+    [SerializeField] GameObject keypadPanel;
+    [SerializeField] Collider2D blockingCollider;
+    [SerializeField] PasscodeManager passcode;
+    [SerializeField] Mission1State mission1;
 
     bool playerInRange;
     bool unlocked = false;
 
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player")) playerInRange = true;
-    }
-
-    void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player")) playerInRange = false;
-    }
+    void OnTriggerEnter2D(Collider2D other){ if (other.CompareTag("Player")) playerInRange = true; }
+    void OnTriggerExit2D(Collider2D other){ if (other.CompareTag("Player")) playerInRange = false; }
 
     void Update()
     {
@@ -27,19 +23,35 @@ public class LockedDoor : MonoBehaviour
         {
             if (unlocked)
             {
-                if (messageUI) messageUI.Show("Door opened!");
-                gameObject.SetActive(false);
+                OpenDoor();
+                return;
             }
+
+        mission1?.MarkDoorTried();
+
+        if (passcode != null && passcode.AllRevealed())
+        {
+            keypadPanel?.SetActive(true);
+        }
+        else
+        {
+            if (passcode != null)
+                messageUI?.Show($"Locked. Known: {passcode.GetKnownPattern('•')}", 2f);
             else
-            {
-                if (messageUI) messageUI.Show(lockedMessage, 2f);
-            }
+                messageUI?.Show("Locked. Requires passcode.", 2f);
         }
     }
+}
 
     public void Unlock()
     {
         unlocked = true;
-        if (messageUI) messageUI.Show("Door is now unlocked!");
+        messageUI?.Show("Door unlocked.");
+        OpenDoor();
+    }
+
+    void OpenDoor()
+    {
+        if (blockingCollider) blockingCollider.enabled = false;
     }
 }
