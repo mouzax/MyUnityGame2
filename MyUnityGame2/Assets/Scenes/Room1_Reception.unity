@@ -1383,8 +1383,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3642,8 +3642,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -9642,10 +9642,10 @@ MonoBehaviour:
   cellPrefab: {fileID: 846947699}
   backButton: {fileID: 1541425343}
   titleText: {fileID: 1470430474}
-  messageUI: {fileID: 0}
-  passcode: {fileID: 0}
+  messageUI: {fileID: 260160802}
+  passcode: {fileID: 1731323014}
   digitsToReveal: 02000000
-  terminal: {fileID: 0}
+  terminal: {fileID: 868915960}
   wallColor: {r: 0.3207547, g: 0.21635813, b: 0, a: 1}
   floorColor: {r: 0.25, g: 0.35, b: 0.45, a: 1}
   startColor: {r: 0.25, g: 0.55, b: 0.3, a: 1}
