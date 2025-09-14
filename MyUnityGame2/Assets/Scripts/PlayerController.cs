@@ -110,6 +110,7 @@ public class PlayerController : MonoBehaviour
         {
             if (col == null || col.attachedRigidbody == rb) continue;
             if (!col.gameObject.activeInHierarchy) continue;
+
             if (col.GetComponent<Grabbable>() == null) continue;
 
             float d = ((Vector2)col.transform.position - (Vector2)handAnchor.position).sqrMagnitude;
