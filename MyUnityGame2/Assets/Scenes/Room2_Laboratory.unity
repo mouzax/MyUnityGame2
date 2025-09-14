@@ -129,9 +129,9 @@ GameObject:
   m_Component:
   - component: {fileID: 32108741}
   - component: {fileID: 32108740}
-  - component: {fileID: 32108739}
   - component: {fileID: 32108738}
   - component: {fileID: 32108737}
+  - component: {fileID: 32108742}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -212,28 +212,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &32108739
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 32108736}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e3ed5b6d7894f144a5efd1ecf94b5bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 2
-  walkArea: {fileID: 2102733074}
-  skin: 0.015
-  handAnchor: {fileID: 1659693523}
-  grabRadius: 0.7
-  grabbableMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  disableHeldCollider: 1
-  dropNudge: 0.5
 --- !u!212 &32108740
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -305,6 +283,28 @@ Transform:
   - {fileID: 1659693523}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &32108742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 32108736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e3ed5b6d7894f144a5efd1ecf94b5bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 2
+  walkArea: {fileID: 2102733074}
+  skin: 0.015
+  handAnchor: {fileID: 1659693523}
+  grabRadius: 0.7
+  grabbableMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  disableHeldCollider: 1
+  dropNudge: 0.5
 --- !u!1 &157801673
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,7 +456,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 32108741}
+  followOffset: {x: 0, y: 0}
+  smoothTime: 0
   roomSprite: {fileID: 219367304}
+  padding: 0
+  zoomSize: 1.5
 --- !u!212 &219367304 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 1961371804358373791, guid: e1cc539a75796024381093ce5f2284b8, type: 3}
@@ -2056,8 +2060,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.24902065, y: 0.35574377}
-  m_Radius: 0.47611433
+  m_Offset: {x: 0.24902084, y: 0.44840494}
+  m_Radius: 0.37418702
 --- !u!1 &1086645741
 GameObject:
   m_ObjectHideFlags: 0
@@ -2092,7 +2096,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -335, y: 136.47116}
+  m_AnchoredPosition: {x: -621, y: 263}
   m_SizeDelta: {x: 200, y: 51.7628}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1086645743
@@ -2142,8 +2146,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2315,7 +2319,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -296, y: 174}
+  m_AnchoredPosition: {x: -582, y: 290}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1608186231
@@ -2365,8 +2369,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3158,8 +3162,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 173, y: 372}
-  m_SizeDelta: {x: 346, y: 50}
+  m_AnchoredPosition: {x: 0, y: 166.75}
+  m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1967423458
 MonoBehaviour:
@@ -3203,8 +3207,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278343600
-  m_fontColor: {r: 0.6886792, g: 0.3401599, b: 0.009745443, a: 1}
+    rgba: 4278199948
+  m_fontColor: {r: 0.54901963, g: 0.14901961, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3221,8 +3225,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 15
-  m_fontSizeBase: 15
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
