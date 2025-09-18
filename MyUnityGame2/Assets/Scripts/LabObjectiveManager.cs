@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Linq;
+using System.Collections;
 
 public class LabObjectiveManager : MonoBehaviour
 {
@@ -17,54 +19,43 @@ public class LabObjectiveManager : MonoBehaviour
     [SerializeField] private string nextSceneName = "Main";
     [SerializeField] private float delayBeforeLoad = 1.2f;
 
-    private LabInteractable[] interactables;
+    private SwitchableLight[] lights;
     private int total;
-    private int activatedCount;
+    private int remainingOn;
 
-    void OnEnable()  { LabInteractable.OnActivatedGlobal += HandleActivated; }
-    void OnDisable() { LabInteractable.OnActivatedGlobal -= HandleActivated; }
-
-    public void SpawnObject()
+    void OnEnable()
     {
-        if (objectPrefab != null && spawnPoint != null)
-        {
-            Instantiate(objectPrefab, spawnPoint.position, spawnPoint.rotation);
-        }
-        else
-        {
-            Debug.LogWarning("[LabObjectiveManager] SpawnObject: Missing prefab or spawnPoint.");
-        }
+        LabInteractable.OnActivatedGlobal += HandleInteractableActivated;
+        MonsterController.OnPlayerCaught += HandlePlayerCaught;
+    }
+
+    void OnDisable()
+    {
+        LabInteractable.OnActivatedGlobal -= HandleInteractableActivated;
+        MonsterController.OnPlayerCaught -= HandlePlayerCaught;
     }
 
     void Start()
     {
     #if UNITY_2023_1_OR_NEWER
-        interactables = Object.FindObjectsByType<LabInteractable>(FindObjectsSortMode.None);
+        lights = Object.FindObjectsByType<SwitchableLight>(FindObjectsSortMode.None);
     #else
-        interactables = FindObjectsOfType<LabInteractable>(includeInactive: false);
+        lights = FindObjectsOfType<SwitchableLight>(includeInactive: false);
     #endif
 
-        total = 0;
-        activatedCount = 0;
+        total = lights.Length;
+        remainingOn = lights.Count(l => l.IsOn);
 
-        foreach (var li in interactables)
-        {
-            if (li.Type == LabThing.Microscope ||
-                li.Type == LabThing.GooTank ||
-                li.Type == LabThing.Computer ||
-                li.Type == LabThing.Flask)
-            {
-                total++;
-                if (li.Activated) activatedCount++;
-            }
-        }
+        foreach (var l in lights)
+            l.OnTurnedOff.AddListener(HandleLightTurnedOff);
+
         UpdateProgressUI();
 
         if (spawnPoint == null)
         {
             var tagObj = GameObject.FindGameObjectWithTag("MonsterSpawn");
             if (tagObj != null) spawnPoint = tagObj.transform;
-            if (spawnPoint == null)
+            else
             {
                 var byName = GameObject.Find("MonsterSpawn");
                 if (byName != null) spawnPoint = byName.transform;
@@ -85,38 +76,60 @@ public class LabObjectiveManager : MonoBehaviour
         }
     }
 
-    void HandleActivated(LabInteractable li)
+    void HandleInteractableActivated(LabInteractable li)
     {
-        if (li.Type != LabThing.Microscope &&
-            li.Type != LabThing.GooTank &&
-            li.Type != LabThing.Computer &&
-            li.Type != LabThing.Flask) return;
 
-        activatedCount = Mathf.Clamp(activatedCount + 1, 0, total);
+    }
+
+    void HandleLightTurnedOff()
+    {
+        remainingOn = Mathf.Max(0, remainingOn - 1);
         UpdateProgressUI();
 
-        if (activatedCount >= total)
+        if (remainingOn == 0)
             CompleteObjective();
+    }
+
+    void HandlePlayerCaught()
+    {
+        foreach (var l in lights) l.ForceOn();
+        remainingOn = total;
+        UpdateProgressUI();
+
+        if (messageUI != null)
+            messageUI.Show("The monster caught you! Resetting…", 1.2f);
     }
 
     void UpdateProgressUI()
     {
         if (progressText != null)
-            progressText.text = $"Systems Restored: {activatedCount}/{total}";
+            progressText.text = $"Lights Remaining: {remainingOn}/{total}";
     }
 
     void CompleteObjective()
     {
-        if (messageUI != null) messageUI.Show("All systems restored. Proceeding…", 1.0f);
+        if (messageUI != null) messageUI.Show("All lights switched off. Proceeding…", 1.0f);
 
         if (monster != null) monster.Despawn();
 
         StartCoroutine(LoadNext());
     }
 
-    System.Collections.IEnumerator LoadNext()
+    IEnumerator LoadNext()
     {
         yield return new WaitForSeconds(delayBeforeLoad);
         SceneManager.LoadScene(nextSceneName);
+    }
+
+    public void SpawnObject()
+    {
+        if (objectPrefab != null && spawnPoint != null)
+        {
+            Instantiate(objectPrefab, spawnPoint.position, spawnPoint.rotation);
+        }
+        else
+        {
+            Debug.LogWarning("[LabObjectiveManager] SpawnObject: Missing prefab or spawnPoint.");
+        }
     }
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-public enum LabThing { Microscope, GooTank, Computer, Flask, Book, Puddle, Paper }
+public enum LabThing { Microscope, Flask, Book, Puddle, Paper }
 
 [RequireComponent(typeof(Collider2D))]
 public class LabInteractable : MonoBehaviour
@@ -66,6 +66,10 @@ public class LabInteractable : MonoBehaviour
 
         ApplyVisual(offState: false);
 
+        // 🔑 NEW: tell any SwitchableLight on this object to turn off
+        var sw = GetComponent<SwitchableLight>();
+        if (sw != null) sw.ToggleOrTurnOff();
+
         if (sfxActivate)
         {
             if (!audioSrc) audioSrc = gameObject.AddComponent<AudioSource>();
@@ -87,8 +91,6 @@ public class LabInteractable : MonoBehaviour
     string NiceName(LabThing t) => t switch
     {
         LabThing.Microscope => "Microscope",
-        LabThing.GooTank    => "Containment Tank",
-        LabThing.Computer   => "Workstation",
         LabThing.Flask      => "Chemistry Unit",
         LabThing.Book       => "Research Book",
         LabThing.Puddle     => "Spilled Chemicals",

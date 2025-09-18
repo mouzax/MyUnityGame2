@@ -24,7 +24,7 @@ public class ObjectBacklight2D : MonoBehaviour
         if (builtinLight == null && glowSprite == null)
         {
             var child = FindChildRecursive(transform, childName);
-            if (child == null) child = transform; 
+            if (child == null) child = transform;
 
             builtinLight = child.GetComponentInChildren<Light>(true);
             glowSprite = child.GetComponentInChildren<SpriteRenderer>(true);
@@ -127,4 +127,11 @@ public class ObjectBacklight2D : MonoBehaviour
         }
         return null;
     }
+
+    public void SetActive(bool on)
+    {
+        if (!gameObject) return;
+        gameObject.SetActive(on);
+    }
+
 }
