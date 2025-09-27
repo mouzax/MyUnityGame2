@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Day
   - Time
+  - SwitchItem
   layers:
   - Default
   - TransparentFX
