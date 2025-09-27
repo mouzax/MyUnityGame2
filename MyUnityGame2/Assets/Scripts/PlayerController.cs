@@ -19,6 +19,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] bool disableHeldCollider = true;
     [SerializeField] float dropNudge = 0.5f;
 
+    [Header("Switch Activation (SPACE)")]
+    [SerializeField] LayerMask switchMask = ~0;
+    [SerializeField] bool preferSwitchOverGrab = true;
+
     Rigidbody2D rb;
     BoxCollider2D box;
     SpriteRenderer sr;
@@ -66,8 +70,18 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (heldTf == null) TryPickup();
-            else Drop();
+            if (preferSwitchOverGrab)
+            {
+                if (TryActivateNearest()) return;
+                if (heldTf == null) TryPickup();
+                else Drop();
+            }
+            else
+            {
+                if (heldTf == null) TryPickup();
+                else Drop();
+                if (TryActivateNearest()) return;
+            }
         }
 
         if (heldTf != null) heldTf.position = handAnchor.position;
@@ -97,6 +111,34 @@ public class PlayerController : MonoBehaviour
 
         if (TrySlide(pos, new Vector2(delta.x, 0f))) return;
         if (TrySlide(pos, new Vector2(0f, delta.y))) return;
+    }
+
+    bool TryActivateNearest()
+    {
+        var hits = Physics2D.OverlapCircleAll(transform.position, grabRadius,
+            switchMask.value == 0 ? ~0 : switchMask);
+
+        LabSwitch closest = null;
+        float bestDist = float.PositiveInfinity;
+
+        foreach (var h in hits)
+        {
+            if (h == null || !h.gameObject.activeInHierarchy) continue;
+
+            var sw = h.GetComponent<LabSwitch>();
+            if (sw == null) continue;
+            if (sw.IsOn) continue;
+
+            float d = ((Vector2)h.transform.position - (Vector2)handAnchor.position).sqrMagnitude;
+            if (d < bestDist) { bestDist = d; closest = sw; }
+        }
+
+        if (closest != null)
+        {
+            closest.Activate();
+            return true;
+        }
+        return false;
     }
 
     void TryPickup()
