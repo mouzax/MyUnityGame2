@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LockedDoor : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class LockedDoor : MonoBehaviour
 
     bool playerInRange;
     bool unlocked = false;
+    public bool IsUnlocked => unlocked;
 
     void OnTriggerEnter2D(Collider2D other){ if (other.CompareTag("Player")) playerInRange = true; }
     void OnTriggerExit2D(Collider2D other){ if (other.CompareTag("Player")) playerInRange = false; }
@@ -46,6 +48,8 @@ public class LockedDoor : MonoBehaviour
     public void Unlock()
     {
         unlocked = true;
+        Debug.Log("[LockedDoor] Unlocked. Loading Laboratory…");
+        SceneManager.LoadScene("Room2_Laboratory");
         messageUI?.Show("Door unlocked.");
         OpenDoor();
     }
