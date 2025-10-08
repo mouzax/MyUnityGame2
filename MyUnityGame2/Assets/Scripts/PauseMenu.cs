@@ -19,6 +19,7 @@ public class PauseMenu : MonoBehaviour
     [Header("Input")]
     [SerializeField] private KeyCode toggleKey = KeyCode.Escape;
 
+<<<<<<< Updated upstream
     [Header("Find Player")]
     [SerializeField] private string playerTag = "Player";
 
@@ -28,6 +29,15 @@ public class PauseMenu : MonoBehaviour
         if (menuButton)    menuButton.onClick.AddListener(GoToMainMenu);
         if (restartButton) restartButton.onClick.AddListener(RestartFromBeginning);
         if (quitButton)    quitButton.onClick.AddListener(QuitGame);
+=======
+    private void Awake()
+    {
+        // Wire buttons
+        if (resumeButton  != null) resumeButton.onClick.AddListener(Resume);
+        if (menuButton    != null) menuButton.onClick.AddListener(GoToMainMenu);
+        if (restartButton != null) restartButton.onClick.AddListener(RestartFromBeginning);
+        if (quitButton    != null) quitButton.onClick.AddListener(QuitGame);
+>>>>>>> Stashed changes
 
         Time.timeScale = 1f;
         HidePanel();
@@ -35,18 +45,39 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
+<<<<<<< Updated upstream
         if (Input.GetKeyDown(toggleKey)) TogglePause();
     }
 
     public void TogglePause() { if (IsPaused()) Resume(); else Pause(); }
+=======
+        if (Input.GetKeyDown(toggleKey))
+            TogglePause();
+    }
+
+    public void TogglePause()
+    {
+        if (IsPaused()) Resume();
+        else Pause();
+    }
+
+>>>>>>> Stashed changes
     public void Pause()
     {
         ShowPanel();
         Time.timeScale = 0f;
         AudioListener.pause = true;
+<<<<<<< Updated upstream
         if (resumeButton && EventSystem.current)
             EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
     }
+=======
+
+        if (resumeButton != null && EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+    }
+
+>>>>>>> Stashed changes
     public void Resume()
     {
         HidePanel();
@@ -56,8 +87,11 @@ public class PauseMenu : MonoBehaviour
 
     public void GoToMainMenu()
     {
+<<<<<<< Updated upstream
         SaveCurrentSpot();
 
+=======
+>>>>>>> Stashed changes
         Time.timeScale = 1f;
         AudioListener.pause = false;
         SceneManager.LoadScene(mainMenuScene);
@@ -65,11 +99,19 @@ public class PauseMenu : MonoBehaviour
 
     public void RestartFromBeginning()
     {
+<<<<<<< Updated upstream
 
        Time.timeScale = 1f;
        AudioListener.pause = false;
        TimerManager.RequestHardResetOnNextLoad();
        SceneManager.LoadScene(firstGameScene);
+=======
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+
+
+        SceneManager.LoadScene(firstGameScene);
+>>>>>>> Stashed changes
     }
 
     public void QuitGame()
@@ -81,6 +123,7 @@ public class PauseMenu : MonoBehaviour
 #endif
     }
 
+<<<<<<< Updated upstream
     private void SaveCurrentSpot()
     {
         GameObject playerObj = GameObject.FindGameObjectWithTag(playerTag);
@@ -97,6 +140,8 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
+=======
+>>>>>>> Stashed changes
     private bool IsPaused() { return Time.timeScale == 0f; }
     private void ShowPanel() { if (pausePanel) pausePanel.SetActive(true); }
     private void HidePanel() { if (pausePanel) pausePanel.SetActive(false); }
