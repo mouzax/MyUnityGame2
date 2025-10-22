@@ -9,6 +9,7 @@ public class ItemCollector : MonoBehaviour
     [Header("References")]
     [SerializeField] MessageUI messageUI;
     [SerializeField] RoomShaker roomShaker;
+    [SerializeField] EndGameUI endGameUI;
 
     HashSet<ItemType> collected = new HashSet<ItemType>();
     CollectibleItem nearestItem;
@@ -67,11 +68,19 @@ public class ItemCollector : MonoBehaviour
         collected.Add(item.itemType);
         item.OnCollected();
 
-        if (messageUI) messageUI.ShowCollected(item.displayName + " Collected");
+        if (messageUI)
+            messageUI.ShowCollected(item.displayName + " Collected");
 
-        if (HasAllItems() && roomShaker != null)
+        if (HasAllItems())
         {
-            roomShaker.StopShake();
+            if (roomShaker != null)
+                roomShaker.StopShake();
+
+            if (endGameUI != null)
+                endGameUI.ShowWin(
+                    "Escape Successful!",
+                    "You restored power, turn switches, collected all components, and escaped the facility!"
+                );
         }
     }
 
