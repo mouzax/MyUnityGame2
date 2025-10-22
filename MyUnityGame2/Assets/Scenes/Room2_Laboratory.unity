@@ -4522,7 +4522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f54b7c6c30f4b46968063d4e976eda4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nextSceneName: Main
+  nextSceneName: Final
   nextSceneIndex: -1
   loadDelay: 0.7
   messageUI: {fileID: 1967423458}
