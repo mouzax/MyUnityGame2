@@ -3,8 +3,8 @@ guid: 0031dc0e872c44e358c9948418707329
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1781771002308868529
-    second: fuse_0
+      213: 1889537702765113337
+    second: Fuse_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: fuse_0
+      name: Fuse_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 80
-        height: 24
+        x: 572
+        y: 551
+        width: 116
+        height: 110
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f46c940b6b0e547e0800000000000000
-      internalID: -1781771002308868529
+      spriteID: 9ffa50b878cf83a10800000000000000
+      internalID: 1889537702765113337
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      fuse_0: -1781771002308868529
+      Fuse_0: 1889537702765113337
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
