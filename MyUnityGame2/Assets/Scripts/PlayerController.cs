@@ -23,6 +23,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask switchMask = ~0;
     [SerializeField] bool preferSwitchOverGrab = true;
 
+    //Audio
+    [Header("Footsteps")]
+    [SerializeField] AudioSource footstepSource;
+    [SerializeField] AudioClip[] footstepClips;
+    [SerializeField] float stepInterval = 1.0f; // seconds between steps
+    float stepTimer;
+
     Rigidbody2D rb;
     BoxCollider2D box;
     SpriteRenderer sr;
@@ -33,6 +40,7 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D heldRb;
     Collider2D  heldCol;
     Transform   heldTf;
+
 
     void Awake()
     {
@@ -56,6 +64,10 @@ public class PlayerController : MonoBehaviour
             handAnchor = go.transform;
         }
     }
+
+
+    //Audio
+
 
     void Update()
     {
@@ -85,6 +97,22 @@ public class PlayerController : MonoBehaviour
         }
 
         if (heldTf != null) heldTf.position = handAnchor.position;
+
+
+        bool isMoving = input.sqrMagnitude > 0.1f;
+        if (isMoving)
+        {
+            stepTimer -= Time.deltaTime;
+            if (stepTimer <= 0f)
+            {
+                PlayFootstep();
+                stepTimer = stepInterval;
+            }
+        }
+        else
+        {
+            stepTimer = 0f;
+        }
     }
 
     void FixedUpdate()
@@ -267,5 +295,13 @@ public class PlayerController : MonoBehaviour
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(handAnchor.position, grabRadius);
         }
+    }
+
+
+    void PlayFootstep()
+    {
+        if (footstepSource == null || footstepClips.Length == 0) return;
+        AudioClip clip = footstepClips[Random.Range(0, footstepClips.Length)];
+        footstepSource.PlayOneShot(clip);
     }
 }

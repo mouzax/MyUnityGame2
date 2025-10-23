@@ -9,6 +9,12 @@ public class LightingController : MonoBehaviour
     [SerializeField] float fadeSeconds = 1.0f;
     [SerializeField] Mission1State mission1;
 
+    // Audio
+    [SerializeField] AudioSource ambientSource;
+    [SerializeField] AudioSource sfxSource;
+    [SerializeField] AudioClip switchFlipSFX;
+    [SerializeField] AudioClip flickerSFX;
+
     bool powerOn = false;
     Coroutine fadeCo;
 
@@ -16,6 +22,10 @@ public class LightingController : MonoBehaviour
     {
         if (globalLight) globalLight.intensity = 0f;
         if (playerFlashlight) playerFlashlight.gameObject.SetActive(true);
+
+        // Audio
+        if (ambientSource != null)
+            ambientSource.Play();
     }
 
     public void TurnPowerOn()
@@ -23,7 +33,36 @@ public class LightingController : MonoBehaviour
         if (powerOn) return;
         powerOn = true;
         if (fadeCo != null) StopCoroutine(fadeCo);
+        StartCoroutine(PowerOnSequence()); //Audio
         fadeCo = StartCoroutine(FadeGlobal(1f));
+        if (playerFlashlight) playerFlashlight.gameObject.SetActive(false);
+        if (mission1) mission1.SetPowerOn();
+    }
+
+    //Audio
+    private IEnumerator PowerOnSequence()
+    {
+        if (ambientSource != null && ambientSource.isPlaying)
+            ambientSource.Stop();
+
+        if (sfxSource != null && switchFlipSFX != null)
+            sfxSource.PlayOneShot(switchFlipSFX);
+
+        yield return new WaitForSeconds(0.3f);
+
+        if (sfxSource != null && flickerSFX != null)
+            sfxSource.PlayOneShot(flickerSFX);
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (globalLight) globalLight.intensity = 0.3f;
+            yield return new WaitForSeconds(0.1f);
+            if (globalLight) globalLight.intensity = 0f;
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        fadeCo = StartCoroutine(FadeGlobal(1f));
+        Debug.Log("PowerOnSequence started!");
         if (playerFlashlight) playerFlashlight.gameObject.SetActive(false);
         if (mission1) mission1.SetPowerOn();
     }
