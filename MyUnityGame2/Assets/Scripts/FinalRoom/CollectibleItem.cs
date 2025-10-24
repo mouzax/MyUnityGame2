@@ -9,8 +9,23 @@ public class CollectibleItem : MonoBehaviour
     public string displayName = "Item";
     public bool destroyOnCollect = false;
 
+    [Header("Audio")]
+    [SerializeField] AudioSource sfxSource;
+    [SerializeField] AudioClip pickupSFX;
+
     public void OnCollected()
     {
+
+        //Audio
+        if (sfxSource != null && pickupSFX != null)
+            sfxSource.PlayOneShot(pickupSFX);
+
+        if (destroyOnCollect)
+            Destroy(gameObject);
+        else
+            gameObject.SetActive(false);
+
+        
         if (destroyOnCollect) Destroy(gameObject);
         else gameObject.SetActive(false);
     }

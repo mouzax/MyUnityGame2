@@ -76,6 +76,10 @@ public class ItemCollector : MonoBehaviour
             if (roomShaker != null)
                 roomShaker.StopShake();
 
+            AudioSource ambient = FindObjectOfType<AudioSource>();
+            if (ambient != null && ambient.isPlaying)
+                ambient.Stop();
+
             if (endGameUI != null)
                 endGameUI.ShowWin(
                     "Escape Successful!",
